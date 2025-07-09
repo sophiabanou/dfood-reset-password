@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 import { forgotSchema } from './schema';
 import PasswordInput from './PasswordInput';
@@ -7,22 +7,6 @@ import './App.css';
 import Logo from './assets/logo.svg';
 
 function App() {
-  // const [newPassword, setNewPassword] = useState('');
-  // const [message, setMessage] = useState('');
-
-  // const handleReset = async (e) => {
-  //   e.preventDefault();
-
-  //   const { error } = await supabase.auth.updateUser({
-  //     password: newPassword,
-  //   });
-
-  //   if (error) {
-  //     setMessage(`Error: ${error.message}`);
-  //   } else {
-  //     setMessage('✅ Password updated! You can now log in.');
-  //   }
-  // };
   const [form, setForm] = useState({
     password: ""
   })
@@ -32,7 +16,26 @@ function App() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("token_hash");
+
+    if (code) {
+      supabase.auth.exchangeCodeForSession({ code })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Error exchanging code:", error.message);
+            setError({ password: "Invalid or expired reset link." });
+          } else {
+            setSessionReady(true);
+          }
+        });
+    } else {
+      setError({ password: "No reset code found in URL." });
+    }
+  }, []);
 
   const handleChange = (
     e
@@ -101,7 +104,7 @@ function App() {
           <form onSubmit={handleSubmit}>
             <PasswordInput onChange={handleChange} onFocus={handleFocus} value={form.password} error={error.password} />
 
-            <button type='submit' className='primaryButton' disabled={loading}>
+            <button type='submit' className='primaryButton' disabled={loading || !sessionReady}>
               {
                 !loading ? (
                   <p className='primaryButtonText'>RESET PASSWORD</p>
