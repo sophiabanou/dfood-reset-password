@@ -17,6 +17,7 @@ function App() {
 
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -27,13 +28,16 @@ function App() {
         .then(({ error }) => {
           if (error) {
             console.error("Error exchanging code:", error.message);
-            setError({ password: "Invalid or expired reset link." });
+            setError({ password: "This reset link has expired. Please request a new one." });
           } else {
             setSessionReady(true);
           }
+        }).finally(() => {
+          setCheckingSession(false);
         });
     } else {
       setError({ password: "No reset code found in URL." });
+      setCheckingSession(false);
     }
   }, []);
 
@@ -97,7 +101,7 @@ function App() {
     }
   }
 
-  if (!sessionReady && loading) {
+  if (checkingSession) {
     return (
       <div className='page-wrapper'>
         <div className='form-wrapper'>
@@ -112,14 +116,14 @@ function App() {
   }
 
 
-  if (!sessionReady && !loading) {
+  if (!sessionReady) {
     return (
       <div className='page-wrapper'>
         <div className='form-wrapper'>
           <div className='form-header'>
             <img src={Logo} className='logo' />
 
-            <p className='errorMessage'>This reset link has expired. Please request a new one.</p>
+            <p className='errorMessage'>{error}</p>
           </div>
         </div>
       </div>
