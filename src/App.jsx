@@ -86,6 +86,8 @@ function App() {
         throw new Error(error)
       }
 
+      alert("Your password was reset successfully!")
+
     } catch (e) {
       setError({
         password: e.message || "",
@@ -94,6 +96,36 @@ function App() {
       setLoading(false)
     }
   }
+
+  if (!sessionReady && loading) {
+    return (
+      <div className='page-wrapper'>
+        <div className='form-wrapper'>
+          <div className='form-header'>
+            <img src={Logo} className='logo' />
+
+            <span className='loader-dark' />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+  if (!sessionReady && !loading) {
+    return (
+      <div className='page-wrapper'>
+        <div className='form-wrapper'>
+          <div className='form-header'>
+            <img src={Logo} className='logo' />
+
+            <p className='errorMessage'>This reset link has expired. Please request a new one.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='page-wrapper'>
       <div className='form-wrapper'>
