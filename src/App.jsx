@@ -7,54 +7,48 @@ import './App.css';
 import Logo from './assets/logo.svg';
 
 function App() {
-  const [form, setForm] = useState({
-    password: ""
-  })
+  const [form, setForm] = useState({ password: "" });
 
-  const [error, setError] = useState({
-    password: ""
-  });
-
+  const [error, setError] = useState({ password: "" });
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [globalError, setGlobalError] = useState("");
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("token_hash");
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession({ code })
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    const type = params.get('type');
+
+    if (type === 'recovery' && access_token && refresh_token) {
+      supabase.auth
+        .setSession({ access_token, refresh_token })
         .then(({ error }) => {
           if (error) {
-            console.error("Error exchanging code:", error.message);
-            setError({ password: "This reset link has expired. Please request a new one." });
+            console.error('Session error:', error);
+            setGlobalError('Session error. Please try the reset link again.');
+            setSessionReady(false);
           } else {
             setSessionReady(true);
           }
-        }).finally(() => {
           setCheckingSession(false);
         });
     } else {
-      setError({ password: "No reset code found in URL." });
+      setGlobalError('Invalid or expired recovery link.');
+      setSessionReady(false);
       setCheckingSession(false);
     }
   }, []);
 
-  const handleChange = (
-    e
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      password: e.target.value,
-    }));
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, password: e.target.value }));
   };
 
   const handleFocus = () => {
-    setError((prev) => ({
-      ...prev,
-      password: "",
-    }));
+    setError((prev) => ({ ...prev, password: "" }));
   };
 
   const validateForgot = () => {
@@ -74,32 +68,26 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForgot();
-    setError({
-      password: errors?.password || "",
-    });
+    setError({ password: errors?.password || "" });
     if (errors) return;
 
     setLoading(true);
-
     try {
       const { error } = await supabase.auth.updateUser({
         password: form.password,
       });
 
       if (error) {
-        throw new Error(error)
+        throw error;
       }
 
-      alert("Your password was reset successfully!")
-
+      alert("Your password was reset successfully!");
     } catch (e) {
-      setError({
-        password: e.message || "",
-      });
+      setError({ password: e.message || "Failed to reset password." });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (checkingSession) {
     return (
@@ -107,7 +95,6 @@ function App() {
         <div className='form-wrapper'>
           <div className='form-header'>
             <img src={Logo} className='logo' />
-
             <span className='loader-dark' />
           </div>
         </div>
@@ -115,15 +102,13 @@ function App() {
     );
   }
 
-
   if (!sessionReady) {
     return (
       <div className='page-wrapper'>
         <div className='form-wrapper'>
           <div className='form-header'>
             <img src={Logo} className='logo' />
-
-            <p className='errorMessage'>{error}</p>
+            <p className='errorMessage'>{globalError || error.password}</p>
           </div>
         </div>
       </div>
@@ -138,21 +123,22 @@ function App() {
           <h1 className='heading'>Reset Password</h1>
 
           <form onSubmit={handleSubmit}>
-            <PasswordInput onChange={handleChange} onFocus={handleFocus} value={form.password} error={error.password} />
+            <PasswordInput
+              onChange={handleChange}
+              onFocus={handleFocus}
+              value={form.password}
+              error={error.password}
+            />
 
-            <button type='submit' className='primaryButton' disabled={loading || !sessionReady}>
-              {
-                !loading ? (
-                  <p className='primaryButtonText'>RESET PASSWORD</p>
-                ) : (
-                  <span className='loader'></span>
-                )
-              }
+            <button type='submit' className='primaryButton' disabled={loading}>
+              {!loading ? (
+                <p className='primaryButtonText'>RESET PASSWORD</p>
+              ) : (
+                <span className='loader'></span>
+              )}
             </button>
           </form>
         </div>
-
-
       </div>
     </div>
   );
