@@ -1,12 +1,16 @@
-# React + Vite
+# DFOOD reset page
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Finished](https://img.shields.io/badge/Status-Finished-green?style=for-the-badge)
 
-Currently, two official plugins are available:
+This is a React + Vite reset password page for the DFOOD food delivery mobile app.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<p align="center">
+  <img src="./preview.png" alt="DFOOD Reset Password Preview" width="100%"/>
+</p>
 
-## Expanding the ESLint configuration
+## Technologies Used
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<p align="left">
+  <img src="https://img.shields.io/badge/-react-%2320232a?logo=react&logoColor=%2361DAFB&style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+</p>
